@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2 style="margin-bottom: 20px; color: #2d3748;">🎫 All Tickets</h2>
+    
+    {% if tickets %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid #e2e8f0; background: #f7fafc;">
+                    <th style="text-align: left; padding: 15px; color: #2d3748; font-weight: bold;">ID</th>
+                    <th style="text-align: left; padding: 15px; color: #2d3748; font-weight: bold;">Title</th>
+                    <th style="text-align: left; padding: 15px; color: #2d3748; font-weight: bold;">Description</th>
+                    <th style="text-align: left; padding: 15px; color: #2d3748; font-weight: bold;">Category</th>
+                    <th style="text-align: left; padding: 15px; color: #2d3748; font-weight: bold;">Priority</th>
+                    <th style="text-align: left; padding: 15px; color: #2d3748; font-weight: bold;">Status</th>
+                    <th style="text-align: left; padding: 15px; color: #2d3748; font-weight: bold;">Created</th>
+                    <th style="text-align: left; padding: 15px; color: #2d3748; font-weight: bold;">Resolution</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket_id, ticket in tickets.items() %}
+                <tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.2s;" onmouseover="this.style.background='#f7fafc'" onmouseout="this.style.background='white'">
+                    <td style="padding: 15px;">
+                        <strong style="color: #3182ce;">{{ ticket.id }}</strong>
+                    </td>
+                    <td style="padding: 15px; max-width: 200px;">
+                        <div style="font-weight: 500;">{{ ticket.title }}</div>
+                    </td>
+                    <td style="padding: 15px; max-width: 250px;">
+                        <div style="color: #666; font-size: 0.9rem;">
+                            {% if ticket.desc %}{{ ticket.desc[:100] }}{% if ticket.desc|length > 100 %}...{% endif %}
+                            {% else %}<em>No description</em>{% endif %}
+                        </div>
+                    </td>
+                    <td style="padding: 15px;">
+                        <div style="display: flex; align-items: center;">
+                            {% if ticket.cat == 'code' %}💻 Code
+                            {% elif ticket.cat == 'infra' %}🚀 Infrastructure
+                            {% elif ticket.cat == 'doc' %}📚 Documentation
+                            {% else %}⚙️ Other{% endif %}
+                        </div>
+                    </td>
+                    <td style="padding: 15px;">
+                        <span class="badge {% if ticket.pri == 1 %}high{% elif ticket.pri == 2 %}med{% else %}low{% endif %}">
+                            {% if ticket.pri == 1 %}🔴 High
+                            {% elif ticket.pri == 2 %}🟡 Medium
+                            {% else %}🟢 Low{% endif %}
+                        </span>
+                    </td>
+                    <td style="padding: 15px;">
+                        <span class="badge {{ ticket.stat }}">
+                            {% if ticket.stat == 'open' %}🔵 Open
+                            {% elif ticket.stat == 'prog' %}🟡 In Progress
+                            {% else %}✅ Done{% endif %}
+                        </span>
+                    </td>
+                    <td style="padding: 15px; color: #718096; font-size: 0.9rem;">
+                        {{ ticket.created }}
+                    </td>
+                    <td style="padding: 15px; max-width: 200px;">
+                        {% if ticket.res %}
+                            <div style="color: #38a169; font-size: 0.9rem;">{{ ticket.res[:80] }}{% if ticket.res|length > 80 %}...{% endif %}</div>
+                        {% else %}
+                            <em style="color: #cbd5e0;">Not resolved</em>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="margin-top: 25px; padding: 20px; background: #f7fafc; border-radius: 10px;">
+        <h3 style="color: #2d3748; margin-bottom: 15px;">📊 Summary</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+            <div style="text-align: center;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #4299e1;">{{ tickets|length }}</div>
+                <div style="color: #666; font-size: 0.9rem;">Total Tickets</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #f6ad55;">
+                    {% set open_count = namespace(value=0) %}
+                    {% for t in tickets.values() if t.stat == 'open' %}{% set open_count.value = open_count.value + 1 %}{% endfor %}
+                    {{ open_count.value }}
+                </div>
+                <div style="color: #666; font-size: 0.9rem;">Open</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #4299e1;">
+                    {% set prog_count = namespace(value=0) %}
+                    {% for t in tickets.values() if t.stat == 'prog' %}{% set prog_count.value = prog_count.value + 1 %}{% endfor %}
+                    {{ prog_count.value }}
+                </div>
+                <div style="color: #666; font-size: 0.9rem;">In Progress</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #48bb78;">
+                    {% set done_count = namespace(value=0) %}
+                    {% for t in tickets.values() if t.stat == 'done' %}{% set done_count.value = done_count.value + 1 %}{% endfor %}
+                    {{ done_count.value }}
+                </div>
+                <div style="color: #666; font-size: 0.9rem;">Completed</div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <div style="text-align: center; padding: 60px 20px;">
+        <div style="font-size: 4rem; margin-bottom: 20px;">📭</div>
+        <h3 style="color: #4a5568; margin-bottom: 15px;">No tickets found</h3>
+        <p style="color: #718096; margin-bottom: 30px;">Start by creating your first ticket using the AI chat interface.</p>
+        <a href="/chat" style="display: inline-block; padding: 15px 30px; background: #4299e1; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; transition: all 0.3s;">
+            💬 Create First Ticket
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 15px; color: #2d3748;">🔍 Quick Actions</h3>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <a href="/chat" style="padding: 10px 20px; background: #4299e1; color: white; text-decoration: none; border-radius: 6px; transition: all 0.3s;">
+            ➕ Create New Ticket
+        </a>
+        <a href="/" style="padding: 10px 20px; background: #48bb78; color: white; text-decoration: none; border-radius: 6px; transition: all 0.3s;">
+            📊 View Dashboard
+        </a>
+        <a href="/demo" style="padding: 10px 20px; background: #ed8936; color: white; text-decoration: none; border-radius: 6px; transition: all 0.3s;">
+            🎮 Try Demo
+        </a>
+    </div>
+</div>
+{% endblock %}

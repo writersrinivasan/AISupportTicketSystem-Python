@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.total }}</div>
+        <div class="stat-label">Total Tickets</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #f6ad55, #ed8936);">
+        <div class="stat-number">{{ stats.open }}</div>
+        <div class="stat-label">Open Tickets</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #4299e1, #3182ce);">
+        <div class="stat-number">{{ stats.in_progress }}</div>
+        <div class="stat-label">In Progress</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #48bb78, #38a169);">
+        <div class="stat-number">{{ stats.done }}</div>
+        <div class="stat-label">Completed</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2 style="margin-bottom: 20px; color: #2d3748;">📊 System Overview</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        <div>
+            <h3 style="color: #4a5568; margin-bottom: 15px;">Priority Distribution</h3>
+            <div style="margin-bottom: 10px;">
+                <span class="badge high">High Priority: {{ stats.high_priority }}</span>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <span class="badge med">Medium Priority: {{ stats.total - stats.high_priority - (stats.total - stats.open - stats.in_progress - stats.done) }}</span>
+            </div>
+            <div>
+                <span class="badge low">Low Priority: {{ stats.total - stats.high_priority - (stats.total - stats.open - stats.in_progress - stats.done) }}</span>
+            </div>
+        </div>
+        
+        <div>
+            <h3 style="color: #4a5568; margin-bottom: 15px;">Categories</h3>
+            <div style="margin-bottom: 8px;">💻 Code Issues: {{ stats.categories.code }}</div>
+            <div style="margin-bottom: 8px;">🚀 Infrastructure: {{ stats.categories.infra }}</div>
+            <div style="margin-bottom: 8px;">📚 Documentation: {{ stats.categories.doc }}</div>
+            <div>⚙️ Other: {{ stats.categories.other }}</div>
+        </div>
+    </div>
+</div>
+
+{% if recent_tickets %}
+<div class="card">
+    <h2 style="margin-bottom: 20px; color: #2d3748;">🎫 Recent Tickets</h2>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid #e2e8f0;">
+                    <th style="text-align: left; padding: 12px; color: #4a5568;">ID</th>
+                    <th style="text-align: left; padding: 12px; color: #4a5568;">Title</th>
+                    <th style="text-align: left; padding: 12px; color: #4a5568;">Category</th>
+                    <th style="text-align: left; padding: 12px; color: #4a5568;">Priority</th>
+                    <th style="text-align: left; padding: 12px; color: #4a5568;">Status</th>
+                    <th style="text-align: left; padding: 12px; color: #4a5568;">Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in recent_tickets %}
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; font-weight: bold; color: #3182ce;">{{ ticket.id }}</td>
+                    <td style="padding: 12px;">{{ ticket.title[:40] }}{% if ticket.title|length > 40 %}...{% endif %}</td>
+                    <td style="padding: 12px;">
+                        {% if ticket.cat == 'code' %}💻 Code
+                        {% elif ticket.cat == 'infra' %}🚀 Infra
+                        {% elif ticket.cat == 'doc' %}📚 Doc
+                        {% else %}⚙️ Other{% endif %}
+                    </td>
+                    <td style="padding: 12px;">
+                        <span class="badge {% if ticket.pri == 1 %}high{% elif ticket.pri == 2 %}med{% else %}low{% endif %}">
+                            {{ ticket.pri }}
+                        </span>
+                    </td>
+                    <td style="padding: 12px;">
+                        <span class="badge {{ ticket.stat }}">
+                            {% if ticket.stat == 'open' %}Open
+                            {% elif ticket.stat == 'prog' %}In Progress  
+                            {% else %}Done{% endif %}
+                        </span>
+                    </td>
+                    <td style="padding: 12px; color: #718096;">{{ ticket.created }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2 style="margin-bottom: 20px; color: #2d3748;">🚀 Quick Actions</h2>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <a href="/chat" style="padding: 12px 24px; background: #4299e1; color: white; text-decoration: none; border-radius: 8px; transition: all 0.3s;">
+            💬 Create New Ticket
+        </a>
+        <a href="/tickets" style="padding: 12px 24px; background: #48bb78; color: white; text-decoration: none; border-radius: 8px; transition: all 0.3s;">
+            📋 View All Tickets
+        </a>
+        <a href="/demo" style="padding: 12px 24px; background: #ed8936; color: white; text-decoration: none; border-radius: 8px; transition: all 0.3s;">
+            🎮 Try Demo
+        </a>
+    </div>
+</div>
+
+{% if stats.total == 0 %}
+<div class="card" style="text-align: center; padding: 40px;">
+    <h3 style="color: #4a5568; margin-bottom: 15px;">No tickets yet!</h3>
+    <p style="color: #718096; margin-bottom: 20px;">Get started by creating your first ticket using natural language.</p>
+    <a href="/chat" style="display: inline-block; padding: 15px 30px; background: #4299e1; color: white; text-decoration: none; border-radius: 10px; font-weight: bold;">
+        🚀 Create First Ticket
+    </a>
+</div>
+{% endif %}
+{% endblock %}

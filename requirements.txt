@@ -1,0 +1,2 @@
+# AI Support Ticket System - Python Dependencies
+flask==3.0.0

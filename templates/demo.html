@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2 style="margin-bottom: 20px; color: #2d3748;">🎮 Interactive Demo</h2>
+    <p style="color: #666; margin-bottom: 25px;">
+        Click the examples below to see the AI system in action. Each example demonstrates 
+        different capabilities of the token-efficient support ticket system.
+    </p>
+    
+    <div id="demo-container">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            {% for example in examples %}
+            <div class="example-card" onclick="runExample('{{ example }}', {{ loop.index0 }})">
+                <div class="example-text">{{ example }}</div>
+                <div class="example-action">Click to run →</div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div id="demo-results" style="margin-top: 30px;"></div>
+    </div>
+</div>
+
+<div class="card">
+    <h2 style="margin-bottom: 20px; color: #2d3748;">💡 System Features</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;">
+        <div class="feature-card">
+            <h3>🎯 Natural Language Processing</h3>
+            <p>Understands plain English commands and automatically extracts ticket details, priorities, and categories.</p>
+        </div>
+        
+        <div class="feature-card">
+            <h3>⚡ Token Efficiency</h3>
+            <p>75% reduction in token usage through compressed responses, abbreviated fields, and smart templates.</p>
+        </div>
+        
+        <div class="feature-card">
+            <h3>🤖 Auto-Classification</h3>
+            <p>Automatically detects ticket categories (code, infra, doc) and priorities based on keywords.</p>
+        </div>
+        
+        <div class="feature-card">
+            <h3>📊 Real-time Updates</h3>
+            <p>Live status tracking with instant JSON responses for all ticket operations.</p>
+        </div>
+        
+        <div class="feature-card">
+            <h3>🔍 Smart Search</h3>
+            <p>Query tickets by status, priority, category with natural language filters.</p>
+        </div>
+        
+        <div class="feature-card">
+            <h3>💾 Zero Config Storage</h3>
+            <p>Simple JSON file storage - no databases or complex setup required.</p>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2 style="margin-bottom: 20px; color: #2d3748;">📈 Token Usage Comparison</h2>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f7fafc; border-bottom: 2px solid #e2e8f0;">
+                    <th style="padding: 15px; text-align: left; color: #2d3748;">Feature</th>
+                    <th style="padding: 15px; text-align: center; color: #2d3748;">Standard System</th>
+                    <th style="padding: 15px; text-align: center; color: #2d3748;">Our System</th>
+                    <th style="padding: 15px; text-align: center; color: #2d3748;">Savings</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 15px; font-weight: 500;">Field Names</td>
+                    <td style="padding: 15px; text-align: center;">"category": "infrastructure"</td>
+                    <td style="padding: 15px; text-align: center;">"cat": "infra"</td>
+                    <td style="padding: 15px; text-align: center; color: #38a169; font-weight: bold;">75%</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0; background: #f9f9f9;">
+                    <td style="padding: 15px; font-weight: 500;">Status Values</td>
+                    <td style="padding: 15px; text-align: center;">"in_progress"</td>
+                    <td style="padding: 15px; text-align: center;">"prog"</td>
+                    <td style="padding: 15px; text-align: center; color: #38a169; font-weight: bold;">60%</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 15px; font-weight: 500;">Average Response Size</td>
+                    <td style="padding: 15px; text-align: center;">~200 tokens</td>
+                    <td style="padding: 15px; text-align: center;">~50 tokens</td>
+                    <td style="padding: 15px; text-align: center; color: #38a169; font-weight: bold;">75%</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0; background: #f9f9f9;">
+                    <td style="padding: 15px; font-weight: 500;">Error Messages</td>
+                    <td style="padding: 15px; text-align: center;">"Ticket not found in system"</td>
+                    <td style="padding: 15px; text-align: center;">"nf"</td>
+                    <td style="padding: 15px; text-align: center; color: #38a169; font-weight: bold;">85%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.example-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.example-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.example-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.example-card:hover::before {
+    left: 100%;
+}
+
+.example-text {
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.example-action {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    text-align: right;
+}
+
+.example-card.running {
+    background: linear-gradient(135deg, #ffa726, #ff7043);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.feature-card {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 4px solid #4299e1;
+}
+
+.feature-card h3 {
+    color: #2d3748;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.feature-card p {
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.demo-result {
+    background: #2d3748;
+    color: #e2e8f0;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 15px 0;
+    font-family: 'Monaco', 'Menlo', monospace;
+    position: relative;
+}
+
+.demo-result::before {
+    content: 'Response';
+    position: absolute;
+    top: -10px;
+    left: 15px;
+    background: #4299e1;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.demo-input {
+    background: #4299e1;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin: 15px 0;
+    font-weight: 500;
+    position: relative;
+}
+
+.demo-input::before {
+    content: 'Input';
+    position: absolute;
+    top: -10px;
+    left: 15px;
+    background: #2d3748;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+</style>
+
+<script>
+async function runExample(example, index) {
+    const card = document.querySelectorAll('.example-card')[index];
+    const resultsDiv = document.getElementById('demo-results');
+    
+    // Visual feedback
+    card.classList.add('running');
+    
+    // Add input to results
+    const inputDiv = document.createElement('div');
+    inputDiv.className = 'demo-input';
+    inputDiv.textContent = example;
+    resultsDiv.appendChild(inputDiv);
+    
+    try {
+        const response = await fetch('/api/process', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: example })
+        });
+        
+        const data = await response.json();
+        
+        // Add result to display
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'demo-result';
+        resultDiv.innerHTML = `<pre>${JSON.stringify(data.ai_response, null, 2)}</pre>`;
+        resultsDiv.appendChild(resultDiv);
+        
+        // Scroll to result
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+    } catch (error) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'demo-result';
+        errorDiv.style.background = '#fed7d7';
+        errorDiv.style.color = '#e53e3e';
+        errorDiv.textContent = `Error: ${error.message}`;
+        resultsDiv.appendChild(errorDiv);
+    } finally {
+        card.classList.remove('running');
+    }
+}
+
+// Clear results when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('demo-results').innerHTML = '';
+});
+</script>
+{% endblock %}

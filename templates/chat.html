@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2 style="margin-bottom: 20px; color: #2d3748;">💬 AI Chat Interface</h2>
+    <p style="color: #666; margin-bottom: 25px;">
+        Type natural language commands to interact with the ticket system. 
+        Try: "Create ticket for login bug, high priority" or "Show open tickets"
+    </p>
+    
+    <div id="chat-container" style="background: #f7fafc; border-radius: 10px; padding: 20px; margin-bottom: 20px; min-height: 400px; max-height: 500px; overflow-y: auto;">
+        <div id="messages">
+            <div class="message system">
+                <strong>🤖 AI Assistant:</strong> Hi! I'm your AI support ticket assistant. 
+                I can help you create, update, view, and close tickets using natural language.
+                <br><br>
+                <strong>Examples:</strong><br>
+                • "Create ticket for API timeout, high priority"<br>
+                • "Update T001 to in progress, investigating"<br>
+                • "Show open tickets"<br>
+                • "Close T001, fixed the issue"
+            </div>
+        </div>
+    </div>
+    
+    <div style="display: flex; gap: 10px;">
+        <input type="text" id="user-input" placeholder="Type your message here..." 
+               style="flex: 1; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px;" 
+               onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()" id="send-btn"
+                style="padding: 12px 24px; background: #4299e1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+            Send
+        </button>
+    </div>
+    
+    <div style="margin-top: 15px;">
+        <strong>Quick Examples:</strong>
+        <div style="margin-top: 10px;">
+            <button onclick="setExample('Create ticket for database timeout, high priority')" class="example-btn">DB Timeout</button>
+            <button onclick="setExample('Create ticket: Update API documentation')" class="example-btn">Update Docs</button>
+            <button onclick="setExample('Show open tickets')" class="example-btn">Show Open</button>
+            <button onclick="setExample('Show high priority tickets')" class="example-btn">High Priority</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.message {
+    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.message.user {
+    background: #e6f3ff;
+    margin-left: 50px;
+}
+
+.message.ai {
+    background: #f0f4f7;
+    margin-right: 50px;
+}
+
+.message.system {
+    background: #fef5e7;
+    border-left: 4px solid #d69e2e;
+}
+
+.message.error {
+    background: #fed7d7;
+    border-left: 4px solid #e53e3e;
+}
+
+.example-btn {
+    margin: 5px;
+    padding: 8px 15px;
+    background: #edf2f7;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.example-btn:hover {
+    background: #e2e8f0;
+}
+
+.json-response {
+    background: #2d3748;
+    color: #e2e8f0;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 10px;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 14px;
+    overflow-x: auto;
+}
+
+.timestamp {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-top: 5px;
+}
+</style>
+
+<script>
+let isProcessing = false;
+
+function handleKeyPress(event) {
+    if (event.key === 'Enter' && !isProcessing) {
+        sendMessage();
+    }
+}
+
+function setExample(text) {
+    document.getElementById('user-input').value = text;
+}
+
+async function sendMessage() {
+    const input = document.getElementById('user-input');
+    const message = input.value.trim();
+    
+    if (!message || isProcessing) return;
+    
+    isProcessing = true;
+    const sendBtn = document.getElementById('send-btn');
+    sendBtn.textContent = 'Processing...';
+    sendBtn.disabled = true;
+    
+    // Add user message
+    addMessage('user', `👤 You: ${message}`);
+    input.value = '';
+    
+    try {
+        const response = await fetch('/api/process', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: message })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            addMessage('error', `❌ Error: ${data.error}`);
+        } else {
+            // Add AI response
+            const aiMessage = `🤖 AI Response:`;
+            const jsonResponse = `<div class="json-response">${JSON.stringify(data.ai_response, null, 2)}</div>`;
+            const timestamp = `<div class="timestamp">⏰ ${data.timestamp}</div>`;
+            
+            addMessage('ai', aiMessage + jsonResponse + timestamp);
+        }
+    } catch (error) {
+        addMessage('error', `❌ Network Error: ${error.message}`);
+    } finally {
+        isProcessing = false;
+        sendBtn.textContent = 'Send';
+        sendBtn.disabled = false;
+        
+        // Scroll to bottom
+        const container = document.getElementById('chat-container');
+        container.scrollTop = container.scrollHeight;
+    }
+}
+
+function addMessage(type, content) {
+    const messages = document.getElementById('messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    messageDiv.innerHTML = content;
+    messages.appendChild(messageDiv);
+    
+    // Scroll to bottom
+    const container = document.getElementById('chat-container');
+    container.scrollTop = container.scrollHeight;
+}
+
+// Focus on input when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('user-input').focus();
+});
+</script>
+{% endblock %}
